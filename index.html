@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucid Dream</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- 背景音乐 -->
+  <audio id="bgm" loop>
+    <source src="audio/dream-ambient.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- Enter 覆盖层 -->
+  <div id="enter-overlay">
+    <button id="enter-btn">Enter the Dream</button>
+  </div>
+
+  <!-- 你原本的网站内容写在这里 -->
+  <!-- Home / Into Dream / Lost / Awake / Project Summary -->
+
+
+<!-- 首页 -->
+<div class="intro-section" id="home">
+  <h1>Lucid Dream</h1>
+  <h2 class="subtitle">Welcome to the lucid dreamscape</h2>
+ 
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#into-dream">Into Dream</a>
+    <a href="#lost">Lost</a>
+    <a href="#awake">Awake</a>
+    <a href="#project-summary">Project Summary</a>
+  </nav>
+</div>
+
+<!-- INTO DREAM -->
+<section id="into-dream">
+  <h2>Step into the Dream</h2>
+  <p class="tip">Explore different worlds before entering your dream collage.</p>
+
+  <div class="preview-worlds">
+    <div class="world-box">
+      <img src="images/candy.jpg" alt="Candy World" onclick="openModal(this)" />
+      <p class="world-label">Candy World</p>
+    </div>
+    <div class="world-box">
+      <img src="images/garden.jpg" alt="Garden World" onclick="openModal(this)" />
+      <p class="world-label">Garden World</p>
+    </div>
+    <div class="world-box">
+      <img src="images/mushroom.jpg" alt="Mushroom World" onclick="openModal(this)" />
+      <p class="world-label">Mushroom World</p>
+    </div>
+    <div class="world-box">
+      <img src="images/cyber.jpg" alt="Cyber World" onclick="openModal(this)" />
+      <p class="world-label">Cyber World</p>
+    </div>
+  </div>
+
+  <p class="tip">Drag fragments from the left palette to the right canvas to create your own dream collage.</p>
+
+  <div class="container">
+    <div class="palette" id="palette">
+      <!-- fragments will be appended here -->
+    </div>
+    <div class="canvas" id="canvas">[ Your dream canvas — drag fragments here ]</div>
+  </div>
+</section>
+
+<script>
+  // ===== 首页漂浮小圆点 =====
+  const numDots = 40;
+  for (let i = 0; i < numDots; i++) {
+    const dot = document.createElement("div");
+    dot.classList.add("dot");
+    dot.style.left = Math.random() * 100 + "vw";
+    dot.style.top = Math.random() * 100 + "vh";
+    dot.style.animationDuration = (3 + Math.random() * 3) + "s";
+    dot.style.animationDelay = Math.random() * 3 + "s";
+    document.body.appendChild(dot);
+  }
+
+  // ===== 分屏拖拽功能 =====
+  const palette = document.getElementById('palette');
+  const canvas = document.getElementById('canvas');
+
+  const fragmentImages = [];
+  for (let i = 1; i <= 24; i++) {
+    fragmentImages.push(`images/fragment${i}.png`);
+  }
+
+  // 生成素材
+  fragmentImages.forEach((src, index) => {
+    const frag = document.createElement('img');
+    frag.src = src;
+    frag.classList.add('fragment');
+    frag.draggable = true;
+
+    frag.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', index);
+      setTimeout(() => frag.style.display = 'none', 0);
+    });
+
+    frag.addEventListener('dragend', e => {
+      frag.style.display = 'block';
+    });
+
+    palette.appendChild(frag);
+  });
+
+  // 拖拽逻辑
+  canvas.addEventListener('dragover', e => e.preventDefault());
+  canvas.addEventListener('drop', e => {
+    e.preventDefault();
+    const idx = e.dataTransfer.getData('text/plain');
+    const frag = document.createElement('img');
+    frag.src = fragmentImages[idx];
+    frag.classList.add('fragment');
+    frag.style.position = 'absolute';
+    frag.style.left = (e.offsetX - 40) + 'px';
+    frag.style.top = (e.offsetY - 40) + 'px';
+    frag.style.cursor = 'default';
+    frag.draggable = false;
+    canvas.appendChild(frag);
+  });
+</script>
+
+
+<!-- LOST SECTION -->
+<section id="lost">
+  <div class="lost-overlay"></div>
+  <div class="lost-content">
+    <h2 class="lost-title">Lost in the Dream</h2>
+    <p class="lost-tip">Move your mouse to reveal the hidden words in the mist...</p>
+    <div class="word-container" id="word-container"></div>
+  </div>
+</section>
+
+<style>
+/* ===== LOST SECTION ===== */
+#lost {
+  position: relative;
+  min-height: 180vh; /* 页面更长 */
+  background: linear-gradient(180deg, #0a1946 0%, #1a3a6b 50%, #7fb6f2 100%);
+  overflow: hidden;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* 朦胧迷雾层 */
+.lost-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05), rgba(0,0,30,0.8));
+  backdrop-filter: blur(50px);
+  pointer-events: none;
+  animation: mistShift 12s ease-in-out infinite alternate;
+}
+
+@keyframes mistShift {
+  0% { backdrop-filter: blur(60px); opacity: 0.9; }
+  100% { backdrop-filter: blur(40px); opacity: 0.6; }
+}
+
+/* 文字容器 */
+.word-container {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 漂浮文字 */
+.word {
+  position: absolute;
+  font-size: 1.4rem;
+  opacity: 0.2;
+  color: #d4e4ff;
+  font-family: "Poppins", sans-serif;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  animation: floatWord 40s linear infinite;
+}
+
+@keyframes floatWord {
+  from { transform: translate(0, 0); }
+  to { transform: translate(300px, -600px); }
+}
+
+/* 标题与提示文字 */
+.lost-title {
+  position: relative;
+  font-size: 3rem;
+  letter-spacing: 2px;
+  z-index: 10;
+  text-shadow: 0 0 15px rgba(180, 220, 255, 0.6);
+  animation: fadeInLost 3s ease forwards;
+}
+
+.lost-tip {
+  position: relative;
+  margin-top: 20px;
+  font-size: 1.2rem;
+  opacity: 0;
+  color: rgba(230,240,255,0.8);
+  animation: fadeInLost 4s ease 2s forwards;
+}
+
+@keyframes fadeInLost {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 鼠标移动时“清晰圈”效果 */
+#lost::after {
+  content: '';
+  position: fixed;
+  top: var(--y);
+  left: var(--x);
+  width: 250px;
+  height: 250px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: all 0.1s ease-out;
+  z-index: 5;
+}
+</style>
+
+<script>
+// ===== LOST SECTION EFFECT =====
+
+// 生成漂浮词汇
+const dreamWords = [
+  "illusion", "memory", "reflection", "subconscious", "echo",
+  "shadow", "silence", "fragment", "mirage", "emotion",
+  "whisper", "pulse", "reverie", "lucidity", "fade",
+  "existence", "flow", "light", "hollow", "dreamscape"
+];
+
+const container = document.getElementById('word-container');
+dreamWords.forEach(word => {
+  const span = document.createElement('span');
+  span.textContent = word;
+  span.classList.add('word');
+  span.style.top = Math.random() * 160 + 'vh';
+  span.style.left = Math.random() * 100 + 'vw';
+  span.style.animationDuration = 35 + Math.random() * 20 + 's';
+  span.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+  span.style.opacity = 0.15 + Math.random() * 0.2;
+  container.appendChild(span);
+});
+
+// 鼠标“清晰圈”跟随
+document.addEventListener('mousemove', (e) => {
+  const lost = document.getElementById('lost');
+  lost.style.setProperty('--x', e.clientX + 'px');
+  lost.style.setProperty('--y', e.clientY + 'px');
+});
+</script>
+
+<!-- AWAKE -->
+<section id="awake">
+  <div class="light-overlay"></div>
+
+  <h2>Awake — Returning to Reality</h2>
+  <p class="tip">Move your mouse to feel the morning light. The dream fades, but its color remains.</p>
+
+  <!-- 心跳动画 -->
+  <div class="pulse-circle"></div>
+
+  <!-- 镜面互动区 -->
+  <div class="mirror">
+    <p class="mirror-text">You open your eyes, and the dream still lingers...</p>
+  </div>
+
+  <!-- 结尾语句 -->
+  <p class="ending-quote">
+    “Perhaps awakening is not the end of dreaming — just a brighter one.”
+  </p>
+
+  <!-- 绘画引导 -->
+  <div class="draw-section">
+    <h3>Draw Your Dream</h3>
+    <p class="tip">Use your mouse to paint what remains in your memory.</p>
+    <canvas id="dreamCanvas" width="800" height="500"></canvas>
+    <button id="clearCanvas">Clear</button>
+  </div>
+</section>
+
+<style>
+  /* ========== AWAKE ========== */
+  #awake {
+    position: relative;
+    min-height: 160vh;
+    background: linear-gradient(180deg, #a1c4fd, #fbc2eb);
+    overflow: hidden;
+    text-align: center;
+    color: #fff;
+    padding: 120px 20px;
+    transition: background 1.5s ease-in-out;
+  }
+
+  #awake h2 {
+    font-size: 2.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+  }
+
+  #awake .tip {
+    color: #f9f9ff;
+    font-size: 1.1rem;
+    opacity: 0.85;
+    margin-bottom: 60px;
+  }
+
+  /* 光线层 */
+  .light-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 120%;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.5), transparent 70%);
+    transition: all 1.2s ease;
+    pointer-events: none;
+    animation: lightPulse 8s infinite alternate ease-in-out;
+  }
+
+  @keyframes lightPulse {
+    from { opacity: 0.4; transform: scale(1); }
+    to { opacity: 0.8; transform: scale(1.1); }
+  }
+
+  /* 心跳圈 */
+  .pulse-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 80px auto;
+    animation: pulse 4s infinite ease-in-out;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.3); opacity: 0.9; }
+  }
+
+  /* 镜面互动 */
+  .mirror {
+    width: 400px;
+    height: 220px;
+    margin: 60px auto;
+    border-radius: 20px;
+    backdrop-filter: blur(18px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 1.2s ease;
+    overflow: hidden;
+  }
+
+  .mirror:hover {
+    backdrop-filter: blur(2px);
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+  }
+
+  .mirror-text {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.2rem;
+    font-style: italic;
+    transition: opacity 0.6s ease;
+  }
+
+  .mirror:hover .mirror-text {
+    opacity: 1;
+    text-shadow: 0 0 15px rgba(255,255,255,0.7);
+  }
+
+  /* 结尾句 */
+  .ending-quote {
+    font-size: 1.3rem;
+    color: rgba(255,255,255,0.9);
+    margin-top: 60px;
+    opacity: 0;
+    animation: fadeIn 3s ease 2s forwards;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  /* 绘画区 */
+  .draw-section {
+    margin-top: 100px;
+  }
+
+  .draw-section h3 {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  #dreamCanvas {
+    background: rgba(255,255,255,0.15);
+    border-radius: 16px;
+    cursor: crosshair;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+  }
+
+  #clearCanvas {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  #clearCanvas:hover {
+    background: rgba(255,255,255,0.6);
+    color: #555;
+  }
+</style>
+
+<script>
+  // 鼠标控制光线位置
+  const lightOverlay = document.querySelector('.light-overlay');
+  document.addEventListener('mousemove', e => {
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    lightOverlay.style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.6), transparent 70%)`;
+  });
+
+  // 绘画功能
+  const dreamCanvas = document.getElementById('dreamCanvas'); // 改名，避免冲突
+  const ctx = dreamCanvas.getContext('2d');
+  ctx.lineCap = 'round'; // 笔触圆滑
+  let drawing = false;
+
+  dreamCanvas.addEventListener('mousedown', () => drawing = true);
+  dreamCanvas.addEventListener('mouseup', () => drawing = false);
+  dreamCanvas.addEventListener('mouseout', () => drawing = false);
+
+  dreamCanvas.addEventListener('mousemove', draw);
+
+  function draw(e) {
+    if (!drawing) return;
+    const rect = dreamCanvas.getBoundingClientRect();
+    ctx.fillStyle = `hsla(${Math.random() * 360}, 80%, 70%, 0.9)`;
+    ctx.beginPath();
+    ctx.arc(e.clientX - rect.left, e.clientY - rect.top, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 清除画布
+  document.getElementById('clearCanvas').addEventListener('click', () => {
+    ctx.clearRect(0, 0, dreamCanvas.width, dreamCanvas.height);
+  });
+</script>
+
+<!-- Project Summary / Beyond Dream -->
+<section id="project-summary">
+  <div class="summary-header">
+    <h1>Project Summary</h1>
+    <p>Traces of the lucid dream remain — soft, silent, shimmering.</p>
+  </div>
+
+  <!-- 横向滚动画廊 -->
+  <div class="scroll-gallery">
+    <div class="image-box"><img src="images/collage1.jpg" alt="Dream Collage 1"></div>
+    <div class="image-box"><img src="images/collage2.jpg" alt="Dream Collage 2"></div>
+    <div class="image-box"><img src="images/collage3.jpg" alt="Dream Collage 3"></div>
+    <div class="image-box"><img src="images/collage4.jpg" alt="Dream Collage 4"></div>
+  </div>
+
+<!-- Project Summary -->
+<section id="project-summary">
+  <div class="summary-container">
+    <h2>Project Summary</h2>
+    <p class="summary-text">
+      This web experience takes you through the phases of a lucid dream — from entering a surreal world,
+      getting lost in illusion, to awakening and finally transcending the boundary between sleep and awareness. 
+      Each layer reflects the fragility and beauty of perception.
+    </p>
+
+    <p class="summary-text">
+      The project draws inspiration from the concept of <em>lucid dreaming</em>, 
+      where the dreamer becomes aware of their dream state and can consciously shape their reality. 
+      Through interactive elements, light gradients, and subtle motion, 
+      it invites participants to explore the threshold between imagination and clarity.
+    </p>
+
+    <div class="inspiration-box">
+      <h3>Inspiration</h3>
+      <p>
+        “In lucid dreams, we find the intersection between our subconscious and the waking mind — 
+        a space where creativity breathes freely and boundaries dissolve.”
+      </p>
+    </div>
+
+    <p class="footer-quote">
+      "Perhaps, awakening is just another way of dreaming with open eyes."
+    </p>
+  </div>
+</section>
+
+
+
+<style>
+/* ========== Project Summary Section ========== */
+#project-summary {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f9e7f7, #fef9f3);
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+  padding: 60px 0;
+  text-align: center;
+}
+/* Project Summary Section */
+#project-summary {
+  background: linear-gradient(180deg, #ffdee8, #d7e9fc, #eadcff);
+  color: #3b2b52;
+  padding: 120px 15%;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 内容容器使页面更宽松 */
+.summary-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* 主标题 */
+#project-summary h2 {
+  font-size: 2.8em;
+  color: #694367;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 6px rgba(255, 255, 255, 0.5);
+}
+
+/* 正文 */
+.summary-text {
+  font-size: 1.1em;
+  line-height: 1.8;
+  margin-bottom: 25px;
+  color: #4c3655;
+}
+
+/* Inspiration 框 */
+.inspiration-box {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  padding: 30px;
+  margin: 50px auto;
+  max-width: 700px;
+  backdrop-filter: blur(8px);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.inspiration-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+}
+
+/* 结尾语 */
+.footer-quote {
+  font-size: 1.2em;
+  font-style: italic;
+  color: #fff;
+  margin-top: 50px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+/* ✨小细节：梦境漂浮光点 */
+#project-summary::before,
+#project-summary::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  animation: floatLight 10s infinite ease-in-out;
+  z-index: 0;
+}
+
+#project-summary::before {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+#project-summary::after {
+  bottom: 15%;
+  right: 10%;
+  animation-delay: 3s;
+}
+
+@keyframes floatLight {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.2);
+    opacity: 0.5;
+  }
+}
+
+/* 标题部分 */
+.summary-header h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #222;
+  margin-bottom: 10px;
+  animation: fadeInDown 2s ease forwards;
+}
+
+.summary-header p {
+  font-size: 1.3rem;
+  color: #666;
+  opacity: 0.8;
+  animation: fadeIn 3s ease 1s forwards;
+}
+
+/* 横向滚动画廊 */
+.scroll-gallery {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 20px;
+  padding: 60px 10%;
+  margin: 30px 0;
+  scrollbar-width: none;
+}
+
+.scroll-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.image-box {
+  flex: 0 0 70%;
+  scroll-snap-align: center;
+  transition: transform 0.4s ease;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.image-box:hover {
+  transform: scale(1.05);
+}
+
+.image-box img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 灵感总结文本 */
+.summary-text {
+  max-width: 800px;
+  margin: 80px auto 100px;
+  padding: 0 20px;
+  animation: fadeUp 2.5s ease forwards;
+}
+
+.summary-text h2 {
+  font-size: 2.2rem;
+  color: #222;
+  margin-bottom: 20px;
+  letter-spacing: 0.05em;
+}
+
+.summary-text p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #444;
+}
+
+.footer-quote {
+  text-align: center;
+  font-size: 1.3rem;
+  font-style: italic;
+  color: #777;
+  margin-bottom: 60px;
+  opacity: 0;
+  animation: fadeIn 3s ease 1.5s forwards;
+  letter-spacing: 1px;
+}
+
+/* 动画效果 */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+  <!-- JS -->
+  <script src="script.js"></script>
+</body>
+</html>
